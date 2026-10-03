@@ -37,15 +37,23 @@ Report these failures grouped by command (typecheck / lint / format), most block
 11. **Code quality** — no dead code or reimplementation of existing page-object/facade logic; no leftover scratch/demo tests.
 12. **CI/CD** — changes to `playwright.config.ts` or scripts don't break the smoke/regression split or parallelization.
 
+## Step 1: Parallel review subagents
+
+Once Step 0 passes (or its failures are reported), spawn two `general-purpose` subagents in parallel — both calls in a single message, `run_in_background: false`, since Step 2 needs both results before it can run. Give each the diff (or files) under review and the path to `CODING_STANDARDS.md`.
+
+1. **Coding-standards reviewer** — checks checklist items 1, 2, 3, 5, 8, 10, 11, 12 (structure, naming, test design, locators, configuration, reporting, code quality, CI/CD) from the checklist above. Report candidate findings with `file:line`, the specific CODING_STANDARDS.md section violated, and a concrete fix.
+2. **Security reviewer** — checks checklist item 6 (hardcoded credentials, secrets/session files missing from `.gitignore`) plus anything beyond the checklist: exposed PII in test data, unsafe eval/injection in test code or fixtures, secrets or token exposure introduced by CI/workflow changes. Same reporting format: `file:line`, rule/rationale, concrete fix.
+
+Each subagent reports candidates only — nothing is posted or finalized yet.
+
+## Step 2: Verifier pass
+
+Spawn a third `general-purpose` subagent as a second opinion. Give it: the diff, `CODING_STANDARDS.md`, and both candidate lists from Step 1. It must independently re-check each candidate against the actual diff and standards (not just trust the first pass), drop false positives, and tag survivors `CONFIRMED` (verified against the diff) or `PLAUSIBLE` (likely but couldn't fully verify, e.g. needs runtime context).
+
 ## How to report findings
 
-For each violation found:
-- Cite `file:line`.
-- Name the specific CODING_STANDARDS.md section it violates.
-- State the concrete fix (not just "this is bad").
+Call `ReportFindings` with the verifier's surviving findings, most severe first (correctness/security like hardcoded secrets or leaking locators outside page objects, before style/tagging nits). If nothing survives, report an empty list and say so plainly — don't invent nitpicks.
 
-Group findings by section, most severe first (correctness/security like hardcoded secrets or leaking locators outside page objects, before style/tagging nits). If nothing violates the standards, say so plainly — don't invent nitpicks.
-
-When reviewing a PR in a context that can post GitHub PR review comments (e.g. CI), post each finding as an inline comment on the exact line it applies to, not as a single summary comment — so the author sees the fix where the change is needed.
+When reviewing a PR in a context that can post GitHub PR review comments (e.g. CI), additionally post each finding as an inline comment on the exact line it applies to, not as a single summary comment — so the author sees the fix where the change is needed.
 
 Do not fix violations unless explicitly asked; this skill is for review only. If asked to also fix, apply the minimal change needed to satisfy the specific checklist item.

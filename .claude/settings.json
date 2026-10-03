@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path // empty' | { read -r f; case \"$f\" in *.ts) (cd /Users/Lavanya/pw_starter && npm run -s typecheck; npm run -s lint; npm run -s format:check) 2>&1 | tail -100 ;; esac; } || true",
+            "statusMessage": "Running static checks (typecheck/lint/format)..."
+          }
+        ]
+      }
+    ]
+  }
+}

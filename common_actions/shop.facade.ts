@@ -14,7 +14,6 @@ export class ShopFacade {
   async addToCart(keyword: string): Promise<string> {
     await this.homePage.navigate();
     await this.homePage.searchFor(keyword);
-    await this.page.waitForLoadState('networkidle');
     await this.page.locator('[class="card skeleton"]').first().waitFor({ state: 'hidden' });
     await this.homePage.getProductCardNames().first().click();
     const name = ((await this.page.getByRole('heading', { level: 1 }).textContent()) ?? '').trim();

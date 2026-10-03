@@ -5,6 +5,5 @@ export class BasePage {
 
   async navigate(path = '/') {
     await this.page.goto(path);
-    await this.page.waitForLoadState('networkidle');
   }
 }

@@ -9,7 +9,6 @@ test.describe('Cart', () => {
   });
 
   test('C01 add single product appears in cart @regression', async ({ page }) => {
-    await page.waitForTimeout(3000);
     const rows = page.getByRole('row').filter({ hasNot: page.getByRole('columnheader') });
     await expect(rows).toHaveCount(1);
   });

@@ -46,6 +46,4 @@ For each violation found:
 
 Group findings by section, most severe first (correctness/security like hardcoded secrets or leaking locators outside page objects, before style/tagging nits). If nothing violates the standards, say so plainly — don't invent nitpicks.
 
-When reviewing a PR in a context that can post GitHub PR review comments (e.g. CI), post each finding as an inline comment on the exact line it applies to, not as a single summary comment — so the author sees the fix where the change is needed.
-
 Do not fix violations unless explicitly asked; this skill is for review only. If asked to also fix, apply the minimal change needed to satisfy the specific checklist item.

@@ -7,6 +7,16 @@ description: Use when reviewing a diff, spec, page object, fixture, or PR in pw_
 
 Reviews changes in this repo against `CODING_STANDARDS.md`, the source of truth for conventions here. Read that file first if it's not already in context — don't restate its prose, apply it.
 
+## Step 0: Static checks
+
+Before reviewing conventions, run the mechanical checks that don't require judgment:
+
+1. `npm run typecheck` — `tsc --noEmit`. Type errors block everything downstream; report them first.
+2. `npm run lint` — ESLint with `@typescript-eslint` + `eslint-plugin-playwright` (catches things like `waitForLoadState('networkidle')`, unused vars/imports).
+3. `npm run format:check` — Prettier. If only formatting is off, say so and offer `npm run format` (or `lint:fix` for auto-fixable lint issues) rather than hand-editing.
+
+Report these failures grouped by command (typecheck / lint / format), most blocking first, with `file:line` citations. Don't silently fix anything unless asked. Once these pass (or their failures are reported), move to the conventions checklist below — don't re-flag a type error or lint violation there, that's what Step 0 is for.
+
 ## What to review
 
 - A git diff (`git diff`, `git diff main...HEAD`) when reviewing a branch or PR.

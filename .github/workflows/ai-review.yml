@@ -1,0 +1,38 @@
+name: AI review
+
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  ai-review:
+    if: >
+      github.event.issue.pull_request &&
+      contains(github.event.comment.body, 'ai_review')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: read
+    steps:
+      - name: Get PR head ref
+        id: pr
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          pr_json=$(gh pr view "${{ github.event.issue.number }}" --repo "${{ github.repository }}" --json headRefName)
+          echo "ref=$(echo "$pr_json" | jq -r .headRefName)" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.pr.outputs.ref }}
+
+      - name: Run AI code review
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          prompt: |
+            Run the `code-review` skill against the changes in PR #${{ github.event.issue.number }}
+            of this repository. Post the findings as inline review comments on the
+            specific lines they apply to (using `gh pr review` / `gh api` inline PR
+            comments), rather than a single summary comment.

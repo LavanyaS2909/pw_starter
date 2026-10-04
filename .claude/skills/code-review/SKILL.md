@@ -39,16 +39,16 @@ Report these failures grouped by command (typecheck / lint / format), most block
 
 ## Step 1: Parallel review subagents
 
-Once Step 0 passes (or its failures are reported), spawn two `general-purpose` subagents in parallel — both calls in a single message, `run_in_background: false`, since Step 2 needs both results before it can run. Give each the diff (or files) under review and the path to `CODING_STANDARDS.md`.
+Once Step 0 passes (or its failures are reported), spawn these two subagents in parallel — both `Agent` calls in a single message, `run_in_background: false`, since Step 2 needs both results before it can run. Give each the diff (or files) under review.
 
-1. **Coding-standards reviewer** — checks checklist items 1, 2, 3, 5, 8, 10, 11, 12 (structure, naming, test design, locators, configuration, reporting, code quality, CI/CD) from the checklist above. Report candidate findings with `file:line`, the specific CODING_STANDARDS.md section violated, and a concrete fix.
-2. **Security reviewer** — checks checklist item 6 (hardcoded credentials, secrets/session files missing from `.gitignore`) plus anything beyond the checklist: exposed PII in test data, unsafe eval/injection in test code or fixtures, secrets or token exposure introduced by CI/workflow changes. Same reporting format: `file:line`, rule/rationale, concrete fix.
+1. `subagent_type: coding-standards-reviewer` — checks checklist items 1, 2, 3, 5, 8, 10, 11, 12 (structure, naming, test design, locators, configuration, reporting, code quality, CI/CD).
+2. `subagent_type: security-reviewer` — checks checklist item 6 (hardcoded credentials, secrets/session files missing from `.gitignore`) plus PII in test data, unsafe eval/injection, and secrets exposure in CI/workflow changes.
 
-Each subagent reports candidates only — nothing is posted or finalized yet.
+Each returns candidates only — nothing is posted or finalized yet.
 
 ## Step 2: Verifier pass
 
-Spawn a third `general-purpose` subagent as a second opinion. Give it: the diff, `CODING_STANDARDS.md`, and both candidate lists from Step 1. It must independently re-check each candidate against the actual diff and standards (not just trust the first pass), drop false positives, and tag survivors `CONFIRMED` (verified against the diff) or `PLAUSIBLE` (likely but couldn't fully verify, e.g. needs runtime context).
+Spawn `subagent_type: review-verifier` as a second opinion. Give it: the diff, `CODING_STANDARDS.md`, and both candidate lists from Step 1. It independently re-checks each candidate (not just trusting the first pass), drops false positives, and tags survivors `CONFIRMED` (verified against the diff) or `PLAUSIBLE` (likely but couldn't fully verify, e.g. needs runtime context).
 
 ## How to report findings
 
